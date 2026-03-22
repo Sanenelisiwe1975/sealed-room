@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "enclave:dev": "ts-node --project tsconfig.enclave.json enclave/server.ts",
+    "enclave:build": "tsc --project tsconfig.enclave.json",
+    "dev:all": "concurrently \"npm run dev\" \"npm run enclave:dev\""
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",

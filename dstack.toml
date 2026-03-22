@@ -1,0 +1,23 @@
+[app]
+name = "sealed-room"
+version = "1.0.0"
+
+[enclave]
+entry = "enclave/server.ts"
+runtime = "node"
+memory_mb = 512
+
+[secrets]
+ANTHROPIC_API_KEY = { source = "env" }
+ENCLAVE_SIGNING_KEY = { source = "env" }
+JUDGE_ACCESS_TOKEN = { source = "env" }
+
+[network]
+ports = [3001]
+
+[attestation]
+tdx = true
+simulate = false
+
+[build]
+command = "npm run build:enclave"
