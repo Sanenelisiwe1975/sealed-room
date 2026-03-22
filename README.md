@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sealed Room
 
-## Getting Started
+A confidential pitch and IP protection platform powered by Trusted Execution Environments (TEE).
 
-First, run the development server:
+Teams submit pitches that are encrypted client-side and evaluated by Claude AI inside a TEE enclave. Judges receive only structured evaluations — never the raw pitch. A cryptographic attestation receipt proves the process was tamper-free.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Architecture
+
+```
+Team Browser  -->  Next.js API  -->  Enclave (Express)  -->  Claude API
+                        |                   |
+                    SQLite DB          TEE Memory
+                                   (pitch never leaves)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Three roles
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Team**: submits encrypted pitch, receives attestation receipt
+- **Judge**: sees AI-generated summary + scores, can ask follow-up questions via enclave
+- **Verifier**: pastes receipt JSON to cryptographically verify it was processed in genuine TEE
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Setup
 
-## Learn More
+### 1. Copy environment variables
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+cp .env.example .env.local
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Fill in:
+- `ANTHROPIC_API_KEY` — your Anthropic API key
+- `JUDGE_ACCESS_TOKEN` — any secret string for judge login
+- `DSTACK_SIMULATE=true` — use simulated TEE (set to false for real TDX hardware)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 2. Install dependencies
 
-## Deploy on Vercel
+```bash
+npm install
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 3. Run development servers
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+In two separate terminals:
+
+```bash
+# Terminal 1: enclave server (port 3001)
+npm run enclave:dev
+
+# Terminal 2: Next.js app (port 3000)
+npm run dev
+```
+
+Or run both together:
+
+```bash
+npm run dev:all
+```
+
+### 4. Open the app
+
+- Landing page: http://localhost:3000
+- Submit pitch: http://localhost:3000/submit
+- Judge dashboard: http://localhost:3000/judge
+- Verify receipt: http://localhost:3000/verify
+
+## Tech Stack
+
+- **Next.js 14** (App Router) + Tailwind CSS + shadcn/ui
+- **Express** enclave server with in-memory pitch storage
+- **Anthropic Claude** (`claude-sonnet-4-20250514`) for evaluation
+- **SQLite** via better-sqlite3 for persistence
+- **Dstack TEE** integration (simulated by default)
+
+## How Attestation Works
+
+1. Team submits pitch (base64-encoded for prototype, real RSA encryption in production)
+2. Enclave decrypts and stores pitch in memory only — never written to disk or logs
+3. Claude evaluates the pitch and returns structured JSON
+4. Enclave computes SHA-256 hash of evaluation output
+5. A TDX quote (simulated in dev mode) is generated binding the measurement to the output hash
+6. Receipt is returned to the team and stored in SQLite
+7. Anyone can paste the receipt at `/verify` to confirm the quote is valid
+
+## Production Deployment
+
+For real TDX attestation, deploy on Dstack infrastructure with `DSTACK_SIMULATE=false` and configure hardware attestation in `dstack.toml`.
+
+## Research
+
+Based on the NDAI (Non-Disclosure AI) pattern from IC3 research by Andrew Miller and Flashbots.
