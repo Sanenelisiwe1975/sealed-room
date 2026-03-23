@@ -152,7 +152,7 @@ function generateTdxQuote(outputHash: string): string {
   return Buffer.from(JSON.stringify(simulatedQuote)).toString('base64');
 }
 
-const PORT = process.env.ENCLAVE_PORT || 3001;
+const PORT = process.env.PORT || process.env.ENCLAVE_PORT || 3001;
 app.listen(PORT, () => {
   console.log(`[enclave] Sealed Room enclave server running on port ${PORT}`);
   console.log(`[enclave] Mode: ${SIMULATE ? 'SIMULATE' : 'PRODUCTION'}`);

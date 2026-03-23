@@ -9,6 +9,7 @@
     "lint": "next lint",
     "enclave:dev": "dotenv -e .env.local -- ts-node --project tsconfig.enclave.json enclave/server.ts",
     "enclave:build": "tsc --project tsconfig.enclave.json",
+    "enclave:start": "node dist/enclave/enclave/server.js",
     "dev:all": "concurrently \"npm run dev\" \"npm run enclave:dev\""
   },
   "dependencies": {
