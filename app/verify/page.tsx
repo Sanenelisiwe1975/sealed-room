@@ -10,11 +10,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import AttestationBadge from '@/components/AttestationBadge';
 
 export default function VerifyPage() {
+  const searchParams = useSearchParams();
   const [receiptText, setReceiptText] = useState('');
   const [submissionId, setSubmissionId] = useState('');
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const id = searchParams.get('id');
+    if (id) {
+      setSubmissionId(id);
+      lookupById(id);
+    }
+  }, []);
 
   const verify = async (receipt: any) => {
     const res = await fetch('/api/verify', {
@@ -40,13 +49,14 @@ export default function VerifyPage() {
     }
   };
 
-  const lookupById = async () => {
-    if (!submissionId.trim()) return;
+  const lookupById = async (id?: string) => {
+    const target = id || submissionId.trim();
+    if (!target) return;
     setLoading(true);
     setError('');
     setResult(null);
     try {
-      const res = await fetch(`/api/submission/${submissionId.trim()}/status`);
+      const res = await fetch(`/api/submission/${target}/status`);
       if (!res.ok) { setError('Submission not found'); return; }
       const data = await res.json();
       if (!data.receipt) { setError('No receipt yet — submission may still be processing or failed'); return; }
@@ -85,7 +95,7 @@ export default function VerifyPage() {
               className="font-mono text-sm bg-background/50"
               onKeyDown={(e) => e.key === 'Enter' && lookupById()}
             />
-            <Button onClick={lookupById} disabled={loading || !submissionId.trim()} className="bg-[#0C447C] hover:bg-[#0C447C]/80 shrink-0">
+            <Button onClick={() => lookupById()} disabled={loading || !submissionId.trim()} className="bg-[#0C447C] hover:bg-[#0C447C]/80 shrink-0">
               <Search className="w-4 h-4 mr-2" />
               Lookup
             </Button>

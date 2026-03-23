@@ -23,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </Link>
             <div className="flex items-center gap-6 text-sm">
               <Link href="/submit" className="text-muted-foreground hover:text-foreground transition-colors">Submit</Link>
+              <Link href="/submissions" className="text-muted-foreground hover:text-foreground transition-colors">Submissions</Link>
               <Link href="/judge" className="text-muted-foreground hover:text-foreground transition-colors">Judge</Link>
               <Link href="/verify" className="text-muted-foreground hover:text-foreground transition-colors">Verify</Link>
               <div className="flex items-center gap-1.5 text-xs text-[#0C447C] font-mono border border-[#0C447C]/30 px-2 py-0.5 rounded-full">
