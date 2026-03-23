@@ -14,7 +14,6 @@ export async function POST(req: NextRequest) {
 
     const submissionId = uuidv4();
 
-    // Store submission in DB
     insertSubmission({
       id: submissionId,
       project_name,
@@ -23,7 +22,6 @@ export async function POST(req: NextRequest) {
       status: 'pending',
     });
 
-    // Async: send to enclave
     processInBackground(submissionId, project_name, one_liner, encrypted_payload);
 
     return NextResponse.json({ submission_id: submissionId, status: 'pending' });
@@ -58,7 +56,6 @@ async function processInBackground(
       output_hash: evaluation.output_hash,
     });
 
-    // Get attestation
     const attestation = await getEnclaveAttestation(submissionId);
     insertAttestation({
       id: uuidv4(),

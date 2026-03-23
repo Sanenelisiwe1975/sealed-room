@@ -4,19 +4,16 @@ import crypto from 'crypto';
 import path from 'path';
 import fs from 'fs';
 
-// Dynamically import to allow running outside enclave context
 let evaluateSubmission: typeof import('../lib/evaluator').evaluateSubmission;
 let answerFollowupQuestion: typeof import('../lib/evaluator').answerFollowupQuestion;
 
 const app = express();
 app.use(express.json({ limit: '10mb' }));
 
-// In-memory store for the enclave (submissions decrypted content keyed by id)
 const decryptedSubmissions = new Map<string, string>();
 const evaluations = new Map<string, any>();
 const attestations = new Map<string, any>();
 
-// Enclave measurement (in real TDX this comes from hardware)
 const ENCLAVE_MEASUREMENT = process.env.ENCLAVE_MEASUREMENT ||
   crypto.createHash('sha256').update('sealed-room-enclave-v1.0').digest('hex');
 
@@ -39,8 +36,6 @@ app.post('/evaluate', async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // In real enclave: decrypt with enclave private key
-    // For prototype: treat encrypted_payload as the pitch content (base64 encoded)
     let pitchContent: string;
     try {
       pitchContent = Buffer.from(encrypted_payload, 'base64').toString('utf8');
@@ -48,14 +43,11 @@ app.post('/evaluate', async (req, res) => {
       pitchContent = encrypted_payload;
     }
 
-    // Store decrypted content in enclave memory (never logged, never returned)
     decryptedSubmissions.set(submission_id, pitchContent);
 
-    // Run AI evaluation
     const { evaluateSubmission: evalFn } = await import('../lib/evaluator');
     const evaluation = await evalFn(pitchContent);
 
-    // Compute output hash
     const evalJson = JSON.stringify(evaluation);
     const outputHash = crypto.createHash('sha256').update(evalJson).digest('hex');
 
@@ -141,7 +133,6 @@ app.get('/attestation/:id', (req, res) => {
 
 function generateTdxQuote(outputHash: string): string {
   if (SIMULATE) {
-    // Simulated quote: HMAC of measurement + outputHash
     const simulatedQuote = {
       type: 'simulated-tdx',
       measurement: ENCLAVE_MEASUREMENT,
@@ -151,10 +142,6 @@ function generateTdxQuote(outputHash: string): string {
     };
     return Buffer.from(JSON.stringify(simulatedQuote)).toString('base64');
   }
-  // Real TDX: use dstack-sdk
-  // const { generateQuote } = require('dstack-sdk');
-  // return generateQuote(outputHash);
-  // For now, return simulated
   const simulatedQuote = {
     type: 'tdx-placeholder',
     measurement: ENCLAVE_MEASUREMENT,

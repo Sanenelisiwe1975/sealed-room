@@ -49,7 +49,6 @@ export async function evaluateSubmission(pitchContent: string): Promise<Evaluati
   const content = message.content[0];
   if (content.type !== 'text') throw new Error('Unexpected response type');
 
-  // Extract JSON from response
   const text = content.text.trim();
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('No JSON found in evaluation response');

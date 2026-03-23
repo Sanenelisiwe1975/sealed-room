@@ -22,13 +22,6 @@ export function generateAttestationQuote(measurementHash: string, outputHash: st
     return Buffer.from(JSON.stringify(quote)).toString('base64');
   }
 
-  // Real TDX attestation via dstack-sdk would go here:
-  // const { TappdClient } = require('dstack-sdk');
-  // const client = new TappdClient();
-  // const quote = await client.tdxQuote(outputHash);
-  // return quote;
-
-  // Fallback for hardware mode not yet configured
   const quote: TdxQuote = {
     type: 'tdx-v1',
     measurement: measurementHash,

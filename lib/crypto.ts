@@ -14,7 +14,6 @@ export function generateKeyPair() {
 
 export function encryptWithPublicKey(data: string, publicKeyPem: string): string {
   const buffer = Buffer.from(data, 'utf8');
-  // RSA can only encrypt small amounts, so use hybrid encryption
   const aesKey = crypto.randomBytes(32);
   const iv = crypto.randomBytes(16);
   const cipher = crypto.createCipheriv('aes-256-cbc', aesKey, iv);
@@ -35,7 +34,6 @@ export function decryptWithPrivateKey(encryptedJson: string, privateKeyPem: stri
   return decrypted.toString('utf8');
 }
 
-// Simple symmetric encryption for client-side use
 export function symmetricEncrypt(data: string, key: string): string {
   const keyBuffer = crypto.createHash('sha256').update(key).digest();
   const iv = crypto.randomBytes(16);

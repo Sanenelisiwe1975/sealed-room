@@ -27,7 +27,6 @@ export default function SubmitForm() {
     setError('');
 
     try {
-      // Client-side: encode pitch as base64 (simulates encryption)
       const encryptedPayload = Buffer.from(
         JSON.stringify({ project_name: projectName, one_liner: oneLiner, pitch })
       ).toString('base64');
@@ -42,7 +41,6 @@ export default function SubmitForm() {
       const data = await res.json();
       setStatus({ submission_id: data.submission_id, status: 'pending' });
 
-      // Poll for completion
       pollStatus(data.submission_id);
     } catch (err: any) {
       setError(err.message);

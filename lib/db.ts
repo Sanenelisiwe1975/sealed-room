@@ -4,7 +4,6 @@ import fs from 'fs';
 
 const DB_PATH = process.env.DB_PATH || path.join(process.cwd(), 'data', 'sealed-room.db');
 
-// Ensure data directory exists
 const dataDir = path.dirname(DB_PATH);
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
