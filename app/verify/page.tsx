@@ -60,6 +60,7 @@ export default function VerifyPage() {
       if (!res.ok) { setError('Submission not found'); return; }
       const data = await res.json();
       if (!data.receipt) { setError('No receipt yet — submission may still be processing or failed'); return; }
+      setReceiptText(JSON.stringify(data.receipt, null, 2));
       await verify(data.receipt);
     } catch (err: any) {
       setError(err.message);
