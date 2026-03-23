@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: sealed-room-enclave
+    runtime: node
+    buildCommand: npm install && npm run enclave:build
+    startCommand: npm run enclave:start
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: DSTACK_SIMULATE
+        value: "true"
+      - key: ENCLAVE_SIGNING_KEY
+        sync: false
+      - key: JUDGE_ACCESS_TOKEN
+        sync: false
