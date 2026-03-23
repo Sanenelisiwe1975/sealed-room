@@ -55,7 +55,7 @@ export async function submitToEnclave(req: EnclaveEvaluationRequest): Promise<En
     body: JSON.stringify(req),
   });
   if (!res.ok) throw new Error(`Enclave error: ${res.status} ${await res.text()}`);
-  return res.json();
+  return res.json() as Promise<EnclaveEvaluationResponse>;
 }
 
 export async function askFollowup(submissionId: string, question: string): Promise<{ answer: string }> {
@@ -65,19 +65,19 @@ export async function askFollowup(submissionId: string, question: string): Promi
     body: JSON.stringify({ submission_id: submissionId, question }),
   });
   if (!res.ok) throw new Error(`Enclave error: ${res.status} ${await res.text()}`);
-  return res.json();
+  return res.json() as Promise<{ answer: string }>;
 }
 
 export async function getEnclaveAttestation(submissionId: string): Promise<EnclaveAttestationResponse> {
   const res = await fetch(`${ENCLAVE_URL}/attestation/${submissionId}`);
   if (!res.ok) throw new Error(`Enclave error: ${res.status} ${await res.text()}`);
-  return res.json();
+  return res.json() as Promise<EnclaveAttestationResponse>;
 }
 
 export async function checkEnclaveHealth(): Promise<{ status: string; measurement: string; simulate: boolean }> {
   const res = await fetch(`${ENCLAVE_URL}/health`);
   if (!res.ok) throw new Error('Enclave unreachable');
-  return res.json();
+  return res.json() as Promise<{ status: string; measurement: string; simulate: boolean }>;
 }
 
 export function isSimulateMode(): boolean {
